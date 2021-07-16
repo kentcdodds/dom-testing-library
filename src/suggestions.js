@@ -48,7 +48,7 @@ function makeSuggestion(queryName, element, content, {variant, name}) {
     variant,
     warning,
     toString() {
-      if (warning) {
+      if (warning && !getConfig().silentA11yWarn) {
         console.warn(warning)
       }
       let [text, options] = queryArgs
