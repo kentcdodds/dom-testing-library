@@ -1,5 +1,6 @@
 import {configure, getConfig} from '../config'
 import {getQueriesForElement} from '../get-queries-for-element'
+import {getDefaultNormalizer} from '../'
 import {render, renderIntoDocument} from './helpers/test-utils'
 
 test('by default logs accessible roles when it fails', () => {
@@ -278,6 +279,28 @@ test('accessible name filter implements TextMatch', () => {
       },
     }),
   ).not.toBeNull()
+})
+
+test('accessible name obeys exact: false', () => {
+  const {getByRole} = render(
+    `<h1>Sign <em>up</em></h1><h2>Details</h2><h2>Your Signature</h2>`,
+  )
+
+  // subset using exact: false
+  expect(getByRole('heading', {name: 'gn u', exact: false})).not.toBeNull()
+});
+
+test('accessible name obeys text normalizer', () => {
+  const {getByRole} = render(
+    `<h1>Sign \u2068up\u2069</h1>`,
+  )
+
+  // match using a normalizer
+  expect(getByRole('heading', {
+    name: /gn u/,
+    // Remove all isolation characters
+    normalizer: str => getDefaultNormalizer()(str).replace(/[\u2066-\u2069]+/g, ''),
+  })).not.toBeNull()
 })
 
 test('TextMatch serialization in error message', () => {
